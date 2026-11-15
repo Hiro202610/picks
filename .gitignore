@@ -1,0 +1,5 @@
+# 作業用ファイル（公開サイトには不要）
+pinterest_batch.csv
+research/
+__pycache__/
+*.pyc

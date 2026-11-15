@@ -1,5 +1,44 @@
 [
   {
+    "id": "item_20261116_01",
+    "title": "Bedsure GentleSoft Fleece Throw Blanket in Cloud White",
+    "category": "Cozy Home Decor",
+    "summary": "This cloud-soft fleece throw is the easiest way to make a sofa or bed feel instantly cozier. The clean white tone brightens neutral spaces, and it's light enough to drape, layer and snuggle under all season long.",
+    "points": [
+      "Plush, lightweight fleece that feels cozy, not heavy",
+      "Crisp white tone that brightens neutral spaces",
+      "Throw size that's perfect for sofas, beds and reading nooks"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0BPLB81LX?tag=awd2501-20",
+    "badge": "Best Seller"
+  },
+  {
+    "id": "item_20261116_02",
+    "title": "MIULEE Soft Velvet Pillow Covers, Set of 2 in Warm Beige",
+    "category": "Cozy Home Decor",
+    "summary": "A pair of plush velvet covers that instantly makes a sofa look styled and expensive. The warm beige shade layers beautifully with linen, boucle and wood tones for that calm, neutral look.",
+    "points": [
+      "Two 18x18 inch covers (pillow inserts not included)",
+      "Soft velvet with a subtle, luxe sheen",
+      "Warm beige shade that layers with any neutral palette"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0BP183BVL?tag=awd2501-20",
+    "badge": "Editor's Pick"
+  },
+  {
+    "id": "item_20261116_03",
+    "title": "Homemory Flameless LED Tea Lights, 24-Pack",
+    "category": "Cozy Home Decor",
+    "summary": "Get the warm, candlelit glow you love with none of the worry. Scatter these battery-operated tea lights across a mantel, lanterns or a dinner table for an instantly cozy evening ambiance.",
+    "points": [
+      "24 battery-operated tea lights, batteries included",
+      "Up to 200+ hours of warm amber glow",
+      "No open flame — worry-free near fabrics, kids and pets"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B07XBRM234?tag=awd2501-20",
+    "badge": "Cozy Favorite"
+  },
+  {
     "id": "linen-throw-blanket",
     "title": "Stonewashed Linen Throw Blanket",
     "category": "Home Decor",
