@@ -11,6 +11,9 @@ auto_updater.py — 商品リサーチ → products.json 更新 → GitHub Pages
   # 引数なしで実行すると、ジャンルと件数を対話形式で聞きます
   python auto_updater.py
 
+  # GitHubの images/ に画像をアップロードした後：取り込み → サイト用JPEG作成 → push
+  python auto_updater.py --sync-images
+
 オプション:
   --no-push   products.json と CSV は更新するが git commit / push はしない（確認用）
 """
@@ -34,6 +37,9 @@ MODEL = "claude-opus-5-5"
 ROOT = Path(__file__).resolve().parent
 PRODUCTS_JSON = ROOT / "products.json"
 PINTEREST_CSV = ROOT / "pinterest_batch.csv"
+IMAGES_DIR = ROOT / "images"          # Pinterest用の元画像（{id}.png）
+WEB_IMAGES_DIR = IMAGES_DIR / "web"   # サイト表示用の軽量JPEG（自動生成）
+WEB_IMAGE_WIDTH = 800
 
 ASIN_RE = re.compile(r"^[A-Z0-9]{10}$")
 ASIN_IN_URL_RE = re.compile(r"/dp/([A-Z0-9]{10})")
@@ -60,7 +66,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--count", type=int, help="取得件数（デフォルト5）")
     p.add_argument("--input", help="リサーチ結果のJSONファイル（指定時はAPIを使わない）")
     p.add_argument("--no-push", action="store_true", help="git commit / push を行わない")
+    p.add_argument("--sync-images", action="store_true",
+                   help="GitHubから画像を取り込み、サイト用JPEGを作ってpushする（商品追加はしない）")
     args = p.parse_args()
+    if args.sync_images:
+        return args
 
     if not args.genre:
         args.genre = input("対象ジャンルを入力してください（例: Home & Kitchen）: ").strip() or "Home & Kitchen"
@@ -283,13 +293,49 @@ def save_csv(rows: list[dict]) -> None:
         w.writerows(rows)
 
 
+def optimize_images() -> list[str]:
+    """images/{id}.png から サイト用の images/web/{id}.jpg（幅800px）を作る。作成したidを返す"""
+    try:
+        from PIL import Image
+    except ImportError:
+        print("⚠️  Pillow がないためサイト用画像を作れません: python -m pip install pillow")
+        return []
+    WEB_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+    made = []
+    for src in sorted(IMAGES_DIR.glob("*")):
+        if src.suffix.lower() not in {".png", ".jpg", ".jpeg", ".webp"} or not src.is_file():
+            continue
+        dst = WEB_IMAGES_DIR / f"{src.stem}.jpg"
+        if dst.exists() and dst.stat().st_mtime >= src.stat().st_mtime:
+            continue
+        with Image.open(src) as im:
+            im = im.convert("RGB")
+            if im.width > WEB_IMAGE_WIDTH:
+                im = im.resize((WEB_IMAGE_WIDTH, round(im.height * WEB_IMAGE_WIDTH / im.width)), Image.LANCZOS)
+            im.save(dst, "JPEG", quality=82, optimize=True, progressive=True)
+        made.append(src.stem)
+        print(f"🖼  サイト用画像を作成: images/web/{dst.name}（{dst.stat().st_size // 1024} KB）")
+    return made
+
+
 def git(*args: str) -> subprocess.CompletedProcess:
     return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
 
 
-def publish(genre: str, n: int) -> bool:
+def sync_images(push: bool) -> None:
+    pull = git("pull", "--ff-only")
+    if pull.returncode != 0:
+        sys.exit("⚠️  git pull に失敗しました:\n" + pull.stderr.strip())
+    made = optimize_images()
+    if not made:
+        print("✅ 新しい画像はありませんでした（サイト用画像はすべて最新です）。")
+        return
+    if push:
+        publish_message(f"Add site images: {', '.join(made)}")
+
+
+def publish_message(msg: str) -> bool:
     git("add", ".")
-    msg = f"Add {n} new picks: {genre} ({date.today():%Y-%m-%d})"
     c = git("commit", "-m", msg)
     if c.returncode != 0:
         print("⚠️  git commit に失敗しました:\n" + (c.stdout + c.stderr).strip())
@@ -302,8 +348,16 @@ def publish(genre: str, n: int) -> bool:
     return True
 
 
+def publish(genre: str, n: int) -> bool:
+    optimize_images()
+    return publish_message(f"Add {n} new picks: {genre} ({date.today():%Y-%m-%d})")
+
+
 def main() -> None:
     args = parse_args()
+    if args.sync_images:
+        sync_images(push=not args.no_push)
+        return
     products = load_products()
 
     if args.input:
