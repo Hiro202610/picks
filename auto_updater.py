@@ -366,20 +366,24 @@ def save_upload_csv(rows: list[dict]) -> list[str]:
             problems.append(f"{name}: タイトルが{PIN_TITLE_MAX}文字を超えています")
         if len(r.get("Pin_Description", "")) > PIN_DESC_MAX:
             problems.append(f"{name}: 説明文が{PIN_DESC_MAX}文字を超えています")
+        # セル内の改行はPinterestが行区切りと誤認する（「200行を超えています」エラーになる）ので1行にする
+        one_line = {k: " ".join(str(v).split()) for k, v in r.items()}
         out.append({
-            "Title": r.get("Pin_Title", ""),
-            "Media URL": r.get("Image_URL", ""),
-            "Pinterest board": r.get("Pinterest_Board", ""),
+            "Title": one_line.get("Pin_Title", ""),
+            "Media URL": one_line.get("Image_URL", ""),
+            "Pinterest board": one_line.get("Pinterest_Board", ""),
             "Thumbnail": "",  # 動画ピン用。画像ピンでは空欄
-            "Description": r.get("Pin_Description", ""),
-            "Link": r.get("Destination_URL", ""),
-            "Publish date": r.get("Publish_Date", ""),  # 空欄 = すぐ公開
-            "Keywords": r.get("Keywords", ""),
+            "Description": one_line.get("Pin_Description", ""),
+            "Link": one_line.get("Destination_URL", ""),
+            "Publish date": one_line.get("Publish_Date", ""),  # 空欄 = すぐ公開
+            "Keywords": one_line.get("Keywords", ""),
         })
     # Pinterest用はBOMなしUTF-8（BOMがあると先頭列名 "Title" が認識されないことがあるため）
     columns = upload_columns()
     with PINTEREST_UPLOAD_CSV.open("w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=columns, quoting=csv.QUOTE_ALL, extrasaction="ignore", restval="")
+        # 公式ひな形と同じ書式（必要なセルだけ引用符・CRLF改行）
+        w = csv.DictWriter(f, fieldnames=columns, quoting=csv.QUOTE_MINIMAL, lineterminator="\r\n",
+                           extrasaction="ignore", restval="")
         w.writeheader()
         w.writerows(out)
     return problems
