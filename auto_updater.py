@@ -79,9 +79,15 @@ IMAGE_PROMPT_RULES = (
     "Vertical 2:3 aspect ratio (1000x1500 px), Pinterest-style lifestyle photograph. "
     "Soft natural window light, warm neutral palette of cream, beige, oatmeal and light wood, "
     "minimal and airy styling, shallow depth of field, editorial interior-magazine quality, "
-    "photorealistic. Show the product true to its real appearance, as the clear focal point. "
-    "IMPORTANT: absolutely no text, letters, words, numbers, logos, brand names, labels or watermarks anywhere in the image."
+    "photorealistic. Show the product true to its real appearance, as the clear focal point."
 )
+# 文字なしルール（コスメ以外）。コスメはパッケージの商品名がないと何の商品か分からないので残す
+NO_TEXT_RULE = "IMPORTANT: absolutely no text, letters, words, numbers, logos, brand names, labels or watermarks anywhere in the image."
+LABEL_TEXT_RULE = (
+    "Keep the brand name and product name printed on the packaging exactly as on the real product, sharp and legible. "
+    "Do not add any other text, captions, prices or watermarks."
+)
+LABEL_CATEGORIES = {"Beauty"}
 # ChatGPTにはAmazonの商品写真を添付して、見た目を実物に合わせてもらう
 IMAGE_REFERENCE_RULE = "Use the attached product photo as the reference and match the product's real shape, color and texture exactly."
 # カテゴリ別の追加ルール
@@ -353,6 +359,7 @@ def build_items(raw: list[dict], genre: str, count: int, products: list[dict]) -
             "ChatGPT_Image_Prompt": " ".join(filter(None, [
                 f"Product: {title} ({category}). Scene: {scene}",
                 IMAGE_REFERENCE_RULE, CATEGORY_IMAGE_RULES.get(category, ""), IMAGE_PROMPT_RULES,
+                LABEL_TEXT_RULE if category in LABEL_CATEGORIES else NO_TEXT_RULE,
             ])),
             # 生成した画像を GitHub の images/ に「{id}.png」の名前で置くと、このURLで公開される
             "Image_URL": f"{SITE_URL}images/{item_id}.png",
