@@ -264,6 +264,8 @@ def build_items(raw: list[dict], genre: str, count: int, products: list[dict]) -
             "Pin_Description": body + tail,
             "Destination_URL": f"{SITE_URL}?id={item_id}",
             "ChatGPT_Image_Prompt": f"Product: {title} ({genre}). Scene: {scene} {IMAGE_PROMPT_RULES}",
+            # 生成した画像を GitHub の images/ に「{id}.png」の名前で置くと、このURLで公開される
+            "Image_URL": f"{SITE_URL}images/{item_id}.png",
         }
         items.append((product, row))
     return items
@@ -321,6 +323,9 @@ def main() -> None:
     for p, r in items:
         print(f"  - {p['id']}  {p['title']}\n    {p['affiliateUrl']}\n    {r['Destination_URL']}")
     print(f"📄 Pinterest用CSV: {PINTEREST_CSV.name}（UTF-8 BOM付き / {len(items)}行）")
+    print("🖼  画像はGitHubの images/ フォルダに、次の名前でアップロードしてください:")
+    for p, _ in items:
+        print(f"    {p['id']}.png")
 
     if args.no_push:
         print("ℹ️  --no-push 指定のため git push はスキップしました。")
