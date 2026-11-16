@@ -6,3 +6,5 @@ __pycache__/
 pinterest_upload.csv
 
 templates/
+*.xlsx
+~$*

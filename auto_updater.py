@@ -68,6 +68,16 @@ IMAGE_PROMPT_RULES = (
     "photorealistic. Show the product true to its real appearance, as the clear focal point. "
     "IMPORTANT: absolutely no text, letters, words, numbers, logos, brand names, labels or watermarks anywhere in the image."
 )
+# ChatGPTにはAmazonの商品写真を添付して、見た目を実物に合わせてもらう
+IMAGE_REFERENCE_RULE = "Use the attached product photo as the reference and match the product's real shape, color and texture exactly."
+# カテゴリ別の追加ルール
+CATEGORY_IMAGE_RULES = {
+    "Dreamy Nursery": (
+        "Do not show any babies or children. If a crib appears, it must be completely empty "
+        "(no blankets, pillows, bumpers, toys, canopies or netting inside or hanging over it), following safe-sleep guidelines."
+    ),
+    "Beauty": "Product-focused still life (vanity, bathroom shelf or flat lay); do not show human faces.",
+}
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -286,10 +296,12 @@ def build_items(raw: list[dict], genre: str, count: int, products: list[dict]) -
     items = []
     for item_id, (asin, r) in zip(next_ids(products, len(picked)), picked):
         title = r["title"].strip()
+        # リサーチファイルで商品ごとに category を指定すると、複数ジャンルを1回で処理できる
+        category = canonical_category(r.get("category") or genre)
         product = {
             "id": item_id,
             "title": title,
-            "category": genre,
+            "category": category,
             "summary": r["summary"].strip(),
             "points": [p.strip() for p in r["points"]][:3],
             "affiliateUrl": f"https://www.amazon.com/dp/{asin}?tag={TRACKING_ID}",
@@ -298,13 +310,13 @@ def build_items(raw: list[dict], genre: str, count: int, products: list[dict]) -
 
         tags = [t for t in (normalize_hashtag(h) for h in r.get("hashtags", [])) if t][:5]
         if len(tags) < 5:
-            tags = list(dict.fromkeys(tags + default_hashtags(genre)))[:5]
+            tags = list(dict.fromkeys(tags + default_hashtags(category)))[:5]
         body = (r.get("pin_description") or product["summary"]).strip()
         tail = f" {DISCLOSURE}\n\n{' '.join(tags)}"
         if len(body) + len(tail) > PIN_DESC_MAX:
             body = body[: PIN_DESC_MAX - len(tail) - 1].rsplit(" ", 1)[0] + "…"
 
-        pin_title = (r.get("pin_title") or f"{title} | {genre} Idea").strip()
+        pin_title = (r.get("pin_title") or f"{title} | {category} Idea").strip()
         if len(pin_title) > PIN_TITLE_MAX:
             pin_title = pin_title[: PIN_TITLE_MAX - 1].rsplit(" ", 1)[0] + "…"
 
@@ -314,10 +326,13 @@ def build_items(raw: list[dict], genre: str, count: int, products: list[dict]) -
             "Pin_Title": pin_title,
             "Pin_Description": body + tail,
             "Destination_URL": f"{SITE_URL}?id={item_id}",
-            "ChatGPT_Image_Prompt": f"Product: {title} ({genre}). Scene: {scene} {IMAGE_PROMPT_RULES}",
+            "ChatGPT_Image_Prompt": " ".join(filter(None, [
+                f"Product: {title} ({category}). Scene: {scene}",
+                IMAGE_REFERENCE_RULE, CATEGORY_IMAGE_RULES.get(category, ""), IMAGE_PROMPT_RULES,
+            ])),
             # 生成した画像を GitHub の images/ に「{id}.png」の名前で置くと、このURLで公開される
             "Image_URL": f"{SITE_URL}images/{item_id}.png",
-            "Pinterest_Board": board_for(genre),
+            "Pinterest_Board": board_for(category),
             "Keywords": ", ".join(hashtag_to_words(t) for t in tags),
         }
         items.append((product, row))
