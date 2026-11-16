@@ -36,7 +36,21 @@ MODEL = "claude-opus-5-5"
 
 ROOT = Path(__file__).resolve().parent
 PRODUCTS_JSON = ROOT / "products.json"
-PINTEREST_CSV = ROOT / "pinterest_batch.csv"
+PINTEREST_CSV = ROOT / "pinterest_batch.csv"     # 管理用（Excelで見る用・BOM付き）
+PINTEREST_UPLOAD_CSV = ROOT / "pinterest_upload.csv"  # Pinterest公式の一括アップロード用
+
+# サイトのカテゴリ名 → Pinterestのボード名（ボード名はPinterest上の名前と完全一致させる）
+BOARDS = {
+    "Cozy Decor": "Cozy Decor ideas",
+    "Dreamy Nursery": "Dreamy Nursery Ideas",
+    "Beauty": "Beauty Finds",
+}
+# 入力されたジャンル名に含まれる語 → 正式カテゴリ名（例: "Cozy Home Decor" → "Cozy Decor"）
+CATEGORY_KEYWORDS = [
+    (("nursery", "baby", "kids"), "Dreamy Nursery"),
+    (("beauty", "skin", "cosmetic", "makeup", "k-beauty", "hair"), "Beauty"),
+    (("decor", "home", "interior", "cozy", "kitchen"), "Cozy Decor"),
+]
 IMAGES_DIR = ROOT / "images"          # Pinterest用の元画像（{id}.png）
 WEB_IMAGES_DIR = IMAGES_DIR / "web"   # サイト表示用の軽量JPEG（自動生成）
 WEB_IMAGE_WIDTH = 800
@@ -68,8 +82,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--no-push", action="store_true", help="git commit / push を行わない")
     p.add_argument("--sync-images", action="store_true",
                    help="GitHubから画像を取り込み、サイト用JPEGを作ってpushする（商品追加はしない）")
+    p.add_argument("--pinterest-csv", action="store_true",
+                   help="pinterest_batch.csv から Pinterest一括アップロード用CSVを作り直す（手直し後に使う）")
     args = p.parse_args()
-    if args.sync_images:
+    if args.sync_images or args.pinterest_csv:
         return args
 
     if not args.genre:
@@ -79,7 +95,23 @@ def parse_args() -> argparse.Namespace:
         args.count = int(raw) if raw else 5
     if args.count < 1:
         sys.exit("取得件数は1以上にしてください。")
+    canonical = canonical_category(args.genre)
+    if canonical != args.genre:
+        print(f"ℹ️  ジャンル「{args.genre}」はカテゴリ「{canonical}」（ボード: {BOARDS[canonical]}）として登録します。")
+    args.genre = canonical
     return args
+
+
+def canonical_category(genre: str) -> str:
+    g = genre.lower()
+    for words, category in CATEGORY_KEYWORDS:
+        if any(w in g for w in words):
+            return category
+    return genre
+
+
+def board_for(category: str) -> str:
+    return BOARDS.get(category) or BOARDS.get(canonical_category(category), "")
 
 
 def load_products() -> list[dict]:
@@ -220,6 +252,11 @@ def normalize_hashtag(tag: str) -> str:
     return f"#{tag}" if tag else ""
 
 
+def hashtag_to_words(tag: str) -> str:
+    """#CozyHomeDecor → cozy home decor（PinterestのKeywords列用）"""
+    return re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", tag.lstrip("#")).lower()
+
+
 def default_hashtags(genre: str) -> list[str]:
     base = [normalize_hashtag(genre), "#HomeDecorIdeas", "#CozyHome", "#AmazonFinds", "#NeutralDecor"]
     return list(dict.fromkeys(t for t in base if t))[:5]
@@ -276,6 +313,8 @@ def build_items(raw: list[dict], genre: str, count: int, products: list[dict]) -
             "ChatGPT_Image_Prompt": f"Product: {title} ({genre}). Scene: {scene} {IMAGE_PROMPT_RULES}",
             # 生成した画像を GitHub の images/ に「{id}.png」の名前で置くと、このURLで公開される
             "Image_URL": f"{SITE_URL}images/{item_id}.png",
+            "Pinterest_Board": board_for(genre),
+            "Keywords": ", ".join(hashtag_to_words(t) for t in tags),
         }
         items.append((product, row))
     return items
@@ -291,6 +330,90 @@ def save_csv(rows: list[dict]) -> None:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()), quoting=csv.QUOTE_ALL)
         w.writeheader()
         w.writerows(rows)
+
+
+UPLOAD_COLUMNS = ["Title", "Media URL", "Pinterest board", "Thumbnail", "Description", "Link", "Publish date", "Keywords"]
+
+
+def save_upload_csv(rows: list[dict]) -> list[str]:
+    """管理用の行から Pinterest公式の一括アップロード用CSVを書き出す。問題点のリストを返す"""
+    problems, out = [], []
+    for r in rows:
+        name = r.get("Product_Name", "")
+        if not r.get("Pinterest_Board"):
+            problems.append(f"{name}: ボードが決まっていません（BOARDS に追加してください）")
+        if len(r.get("Pin_Title", "")) > PIN_TITLE_MAX:
+            problems.append(f"{name}: タイトルが{PIN_TITLE_MAX}文字を超えています")
+        if len(r.get("Pin_Description", "")) > PIN_DESC_MAX:
+            problems.append(f"{name}: 説明文が{PIN_DESC_MAX}文字を超えています")
+        out.append({
+            "Title": r.get("Pin_Title", ""),
+            "Media URL": r.get("Image_URL", ""),
+            "Pinterest board": r.get("Pinterest_Board", ""),
+            "Thumbnail": "",  # 動画ピン用。画像ピンでは空欄
+            "Description": r.get("Pin_Description", ""),
+            "Link": r.get("Destination_URL", ""),
+            "Publish date": r.get("Publish_Date", ""),  # 空欄 = すぐ公開
+            "Keywords": r.get("Keywords", ""),
+        })
+    # Pinterest用はBOMなしUTF-8（BOMがあると先頭列名 "Title" が認識されないことがあるため）
+    with PINTEREST_UPLOAD_CSV.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=UPLOAD_COLUMNS, quoting=csv.QUOTE_ALL)
+        w.writeheader()
+        w.writerows(out)
+    return problems
+
+
+def check_media_urls(rows: list[dict]) -> list[str]:
+    """Media URL が実際に画像として公開されているか確認する"""
+    import urllib.request
+    missing = []
+    for r in rows:
+        url = r.get("Image_URL", "")
+        try:
+            req = urllib.request.Request(url, method="HEAD")
+            with urllib.request.urlopen(req, timeout=15) as res:
+                ok = res.status == 200 and res.headers.get("Content-Type", "").startswith("image/")
+        except Exception:
+            ok = False
+        if not ok:
+            missing.append(url)
+    return missing
+
+
+def regenerate_upload_csv() -> None:
+    if not PINTEREST_CSV.exists():
+        sys.exit("pinterest_batch.csv がありません。")
+    with PINTEREST_CSV.open(encoding="utf-8-sig", newline="") as f:
+        rows = [{k: v for k, v in r.items() if k} for r in csv.DictReader(f)]
+    # 古い形式のCSV（ボード列・キーワード列なし）を補完する
+    categories = {p["id"]: p.get("category", "") for p in load_products()}
+    for r in rows:
+        pid = r.get("Destination_URL", "").split("id=")[-1]
+        if not r.get("Pinterest_Board"):
+            r["Pinterest_Board"] = board_for(categories.get(pid, ""))
+        if not r.get("Keywords"):
+            r["Keywords"] = ", ".join(hashtag_to_words(t) for t in re.findall(r"#\w+", r.get("Pin_Description", "")))
+        if not r.get("Image_URL"):
+            r["Image_URL"] = f"{SITE_URL}images/{pid}.png"
+    save_csv(rows)
+    report_upload_csv(rows)
+
+
+def report_upload_csv(rows: list[dict]) -> None:
+    problems = save_upload_csv(rows)
+    print(f"📌 Pinterest一括アップロード用CSV: {PINTEREST_UPLOAD_CSV.name}（{len(rows)}行）")
+    for r in rows:
+        print(f"    {r['Pinterest_Board'] or '（ボード未設定）'}  ←  {r['Product_Name']}")
+    missing = check_media_urls(rows)
+    for url in missing:
+        problems.append(f"画像がまだ公開されていません: {url}")
+    if problems:
+        print("⚠️  アップロード前に確認してください:")
+        for p in problems:
+            print(f"    - {p}")
+    else:
+        print("✅ 画像URL・文字数・ボードの確認OK。Pinterestにアップロードできます。")
 
 
 def optimize_images() -> list[str]:
@@ -358,6 +481,9 @@ def main() -> None:
     if args.sync_images:
         sync_images(push=not args.no_push)
         return
+    if args.pinterest_csv:
+        regenerate_upload_csv()
+        return
     products = load_products()
 
     if args.input:
@@ -380,6 +506,9 @@ def main() -> None:
     print("🖼  画像はGitHubの images/ フォルダに、次の名前でアップロードしてください:")
     for p, _ in items:
         print(f"    {p['id']}.png")
+    save_upload_csv([r for _, r in items])
+    print(f"📌 Pinterest一括アップロード用CSV: {PINTEREST_UPLOAD_CSV.name}"
+          "（画像をアップロードして --sync-images した後、--pinterest-csv で最終確認してください）")
 
     if args.no_push:
         print("ℹ️  --no-push 指定のため git push はスキップしました。")
