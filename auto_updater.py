@@ -14,6 +14,14 @@ auto_updater.py — 商品リサーチ → products.json 更新 → GitHub Pages
   # GitHubの images/ に画像をアップロードした後：取り込み → サイト用JPEG作成 → push
   python auto_updater.py --sync-images
 
+  # Pinterest一括アップロード用CSVを作り直す（予約なし = すぐ公開）
+  python auto_updater.py --pinterest-csv
+
+  # 予約投稿：明日から1日2件、米国東部時間 11:00 と 20:30 に公開。在庫切れの商品は外す
+  python auto_updater.py --schedule --exclude item_20261116_14,item_20261116_15
+  #   --start 2026-11-20   開始日を指定 / --per-day 3 --times "9:00,13:00,20:30"  件数と時刻を変更
+  #   --clear-schedule     予約を消して「すぐ公開」に戻す
+
 オプション:
   --no-push   products.json と CSV は更新するが git commit / push はしない（確認用）
 """
@@ -55,6 +63,12 @@ IMAGES_DIR = ROOT / "images"          # Pinterest用の元画像（{id}.png）
 WEB_IMAGES_DIR = IMAGES_DIR / "web"   # サイト表示用の軽量JPEG（自動生成）
 WEB_IMAGE_WIDTH = 800
 
+# 予約投稿：ターゲット（米国）の時間帯で指定し、PinterestにはUTCで渡す
+TARGET_TZ = "America/New_York"
+VIEWER_TZ = "Asia/Tokyo"            # 確認用に日本時間も表示する
+DEFAULT_POST_TIMES = "11:00,20:30"  # 米国東部時間の昼休みと夜（Pinterestがよく見られる時間帯）
+SCHEDULE_MAX_DAYS = 14              # Pinterestで予約できるのは約2週間先まで
+
 ASIN_RE = re.compile(r"^[A-Z0-9]{10}$")
 ASIN_IN_URL_RE = re.compile(r"/dp/([A-Z0-9]{10})")
 PIN_TITLE_MAX = 100
@@ -94,7 +108,17 @@ def parse_args() -> argparse.Namespace:
                    help="GitHubから画像を取り込み、サイト用JPEGを作ってpushする（商品追加はしない）")
     p.add_argument("--pinterest-csv", action="store_true",
                    help="pinterest_batch.csv から Pinterest一括アップロード用CSVを作り直す（手直し後に使う）")
+    s = p.add_argument_group("予約投稿（--pinterest-csv と一緒に使う）")
+    s.add_argument("--schedule", action="store_true", help="公開日時を自動で割り振る")
+    s.add_argument("--start", help="予約の開始日（米国東部時間の日付 YYYY-MM-DD。省略時は明日）")
+    s.add_argument("--per-day", type=int, default=2, help="1日あたりの投稿数（デフォルト2）")
+    s.add_argument("--times", default=DEFAULT_POST_TIMES,
+                   help=f"投稿時刻（米国東部時間・カンマ区切り。デフォルト {DEFAULT_POST_TIMES}）")
+    s.add_argument("--exclude", default="", help="アップロードから外す商品id（カンマ区切り。例: 在庫切れ商品）")
+    s.add_argument("--clear-schedule", action="store_true", help="予約日時を消して「すぐ公開」に戻す")
     args = p.parse_args()
+    if args.schedule or args.clear_schedule or args.exclude:
+        args.pinterest_csv = True
     if args.sync_images or args.pinterest_csv:
         return args
 
@@ -421,7 +445,55 @@ def check_media_urls(rows: list[dict]) -> list[str]:
     return missing
 
 
-def regenerate_upload_csv() -> None:
+def row_id(r: dict) -> str:
+    return r.get("Destination_URL", "").split("id=")[-1]
+
+
+def interleave_by_board(rows: list[dict]) -> list[dict]:
+    """同じボードが連続しないよう、ボードごとに順番に並べ替える"""
+    groups: dict[str, list[dict]] = {}
+    for r in rows:
+        groups.setdefault(r.get("Pinterest_Board", ""), []).append(r)
+    out = []
+    while any(groups.values()):
+        for g in groups.values():
+            if g:
+                out.append(g.pop(0))
+    return out
+
+
+def apply_schedule(rows: list[dict], start: str | None, per_day: int, times: str) -> list[dict]:
+    """rows に Publish_Date（UTC）と確認用の日本時間・米国東部時間を書き込む。予約できない行は返す"""
+    from datetime import datetime, timedelta, timezone
+    from zoneinfo import ZoneInfo
+
+    tz, viewer = ZoneInfo(TARGET_TZ), ZoneInfo(VIEWER_TZ)
+    slots = [t.strip() for t in times.split(",") if t.strip()]
+    per_day = max(1, min(per_day, len(slots)))
+    now = datetime.now(timezone.utc)
+    day = (datetime.strptime(start, "%Y-%m-%d").date() if start
+           else (now.astimezone(tz) + timedelta(days=1)).date())
+    limit = now + timedelta(days=SCHEDULE_MAX_DAYS)
+
+    too_late = []
+    for i, r in enumerate(interleave_by_board(rows)):
+        d = day + timedelta(days=i // per_day)
+        hh, mm = map(int, slots[i % per_day].split(":"))
+        local = datetime(d.year, d.month, d.day, hh, mm, tzinfo=tz)
+        utc = local.astimezone(timezone.utc)
+        if utc <= now:
+            print(f"⚠️  {row_id(r)} の予約日時が過去です（すぐ公開されます）")
+        if utc > limit:
+            too_late.append(r)
+            r["Publish_Date"] = r["Publish_ET"] = r["Publish_JST"] = ""
+            continue
+        r["Publish_Date"] = utc.strftime("%Y-%m-%dT%H:%M:%S")
+        r["Publish_ET"] = local.strftime("%m/%d %H:%M ET")
+        r["Publish_JST"] = utc.astimezone(viewer).strftime("%m/%d %H:%M JST")
+    return too_late
+
+
+def regenerate_upload_csv(args: argparse.Namespace | None = None) -> None:
     if not PINTEREST_CSV.exists():
         sys.exit("pinterest_batch.csv がありません。")
     with PINTEREST_CSV.open(encoding="utf-8-sig", newline="") as f:
@@ -436,15 +508,42 @@ def regenerate_upload_csv() -> None:
             r["Keywords"] = ", ".join(hashtag_to_words(t) for t in re.findall(r"#\w+", r.get("Pin_Description", "")))
         if not r.get("Image_URL"):
             r["Image_URL"] = f"{SITE_URL}images/{pid}.png"
+
+    exclude = {x.strip() for x in (args.exclude.split(",") if args and args.exclude else []) if x.strip()}
+    unknown = exclude - {row_id(r) for r in rows}
+    if unknown:
+        print(f"⚠️  CSVに見つからないid（無視します）: {', '.join(sorted(unknown))}")
+    targets = [r for r in rows if row_id(r) not in exclude]
+    for r in rows:
+        if row_id(r) in exclude:  # 外した行は予約も消しておく
+            r["Publish_Date"] = r["Publish_ET"] = r["Publish_JST"] = ""
+
+    if args and args.clear_schedule:
+        for r in rows:
+            r["Publish_Date"] = r["Publish_ET"] = r["Publish_JST"] = ""
+        print("🗑  予約日時を消しました（アップロードするとすぐ公開されます）。")
+    elif args and args.schedule:
+        too_late = apply_schedule(targets, args.start, args.per_day, args.times)
+        if too_late:
+            print(f"⚠️  {SCHEDULE_MAX_DAYS}日より先になる {len(too_late)}件は今回のCSVから外しました（後日もう一度 --schedule してください）:")
+            for r in too_late:
+                print(f"    - {row_id(r)}  {r['Product_Name']}")
+            late_ids = {row_id(r) for r in too_late}
+            targets = [r for r in targets if row_id(r) not in late_ids]
+        targets.sort(key=lambda r: r.get("Publish_Date", ""))
+
     save_csv(rows)
-    report_upload_csv(rows)
+    if exclude:
+        print(f"⏸  アップロードから外した商品: {', '.join(sorted(exclude & {row_id(r) for r in rows}))}")
+    report_upload_csv(targets)
 
 
 def report_upload_csv(rows: list[dict]) -> None:
     problems = save_upload_csv(rows)
     print(f"📌 Pinterest一括アップロード用CSV: {PINTEREST_UPLOAD_CSV.name}（{len(rows)}行）")
     for r in rows:
-        print(f"    {r['Pinterest_Board'] or '（ボード未設定）'}  ←  {r['Product_Name']}")
+        when = f"{r['Publish_JST']}（{r['Publish_ET']}）" if r.get("Publish_Date") else "すぐ公開"
+        print(f"    {when:<30} {r['Pinterest_Board'] or '（ボード未設定）':<22} {row_id(r)}  {r['Product_Name']}")
     missing = check_media_urls(rows)
     for url in missing:
         problems.append(f"画像がまだ公開されていません: {url}")
@@ -522,7 +621,7 @@ def main() -> None:
         sync_images(push=not args.no_push)
         return
     if args.pinterest_csv:
-        regenerate_upload_csv()
+        regenerate_upload_csv(args)
         return
     products = load_products()
 
