@@ -47,7 +47,7 @@ BOARDS = {
 }
 # 入力されたジャンル名に含まれる語 → 正式カテゴリ名（例: "Cozy Home Decor" → "Cozy Decor"）
 CATEGORY_KEYWORDS = [
-    (("nursery", "baby", "kids"), "Dreamy Nursery"),
+    (("nursery", "nersery", "baby", "kids"), "Dreamy Nursery"),
     (("beauty", "skin", "cosmetic", "makeup", "k-beauty", "hair"), "Beauty"),
     (("decor", "home", "interior", "cozy", "kitchen"), "Cozy Decor"),
 ]
@@ -258,8 +258,12 @@ def hashtag_to_words(tag: str) -> str:
 
 
 def default_hashtags(genre: str) -> list[str]:
-    base = [normalize_hashtag(genre), "#HomeDecorIdeas", "#CozyHome", "#AmazonFinds", "#NeutralDecor"]
-    return list(dict.fromkeys(t for t in base if t))[:5]
+    extra = {
+        "Cozy Decor": ["#CozyDecor", "#HomeDecorIdeas", "#CozyHome", "#NeutralDecor", "#AmazonHomeFinds"],
+        "Dreamy Nursery": ["#NurseryIdeas", "#NurseryDecor", "#BabyRegistry", "#DreamyNursery", "#AmazonBabyFinds"],
+        "Beauty": ["#BeautyFinds", "#SkincareRoutine", "#KBeauty", "#SelfCare", "#AmazonBeautyFinds"],
+    }.get(canonical_category(genre), [normalize_hashtag(genre), "#AmazonFinds"])
+    return list(dict.fromkeys(t for t in extra if t))[:5]
 
 
 def build_items(raw: list[dict], genre: str, count: int, products: list[dict]) -> list[tuple[dict, dict]]:
