@@ -4,3 +4,5 @@ research/
 __pycache__/
 *.pyc
 pinterest_upload.csv
+
+templates/

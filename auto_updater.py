@@ -41,7 +41,7 @@ PINTEREST_UPLOAD_CSV = ROOT / "pinterest_upload.csv"  # Pinterest公式の一括
 
 # サイトのカテゴリ名 → Pinterestのボード名（ボード名はPinterest上の名前と完全一致させる）
 BOARDS = {
-    "Cozy Decor": "Cozy Decor ideas",
+    "Cozy Decor": "Cozy Decor Ideas",
     "Dreamy Nursery": "Dreamy Nursery Ideas",
     "Beauty": "Beauty Finds",
 }
@@ -337,6 +337,22 @@ def save_csv(rows: list[dict]) -> None:
 
 
 UPLOAD_COLUMNS = ["Title", "Media URL", "Pinterest board", "Thumbnail", "Description", "Link", "Publish date", "Keywords"]
+# Pinterestからダウンロードした公式ひな形をここに置くと、その列名・列順でCSVを作る
+TEMPLATE_CSV = ROOT / "templates" / "pinterest_template.csv"
+
+
+def upload_columns() -> list[str]:
+    if not TEMPLATE_CSV.exists():
+        return UPLOAD_COLUMNS
+    with TEMPLATE_CSV.open(encoding="utf-8-sig", newline="") as f:
+        header = [h.strip() for h in next(csv.reader(f), []) if h.strip()]
+    unknown = [h for h in header if h not in UPLOAD_COLUMNS]
+    lacking = [h for h in UPLOAD_COLUMNS if h not in header]
+    if unknown:
+        print(f"⚠️  ひな形に未対応の列があります（空欄で出力）: {', '.join(unknown)}")
+    if lacking:
+        print(f"⚠️  ひな形にない列は出力しません: {', '.join(lacking)}")
+    return header or UPLOAD_COLUMNS
 
 
 def save_upload_csv(rows: list[dict]) -> list[str]:
@@ -361,8 +377,9 @@ def save_upload_csv(rows: list[dict]) -> list[str]:
             "Keywords": r.get("Keywords", ""),
         })
     # Pinterest用はBOMなしUTF-8（BOMがあると先頭列名 "Title" が認識されないことがあるため）
+    columns = upload_columns()
     with PINTEREST_UPLOAD_CSV.open("w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=UPLOAD_COLUMNS, quoting=csv.QUOTE_ALL)
+        w = csv.DictWriter(f, fieldnames=columns, quoting=csv.QUOTE_ALL, extrasaction="ignore", restval="")
         w.writeheader()
         w.writerows(out)
     return problems
@@ -394,8 +411,8 @@ def regenerate_upload_csv() -> None:
     categories = {p["id"]: p.get("category", "") for p in load_products()}
     for r in rows:
         pid = r.get("Destination_URL", "").split("id=")[-1]
-        if not r.get("Pinterest_Board"):
-            r["Pinterest_Board"] = board_for(categories.get(pid, ""))
+        # ボード名は常に最新の BOARDS 設定から決め直す（ボード名変更に追従するため）
+        r["Pinterest_Board"] = board_for(categories.get(pid, "")) or r.get("Pinterest_Board", "")
         if not r.get("Keywords"):
             r["Keywords"] = ", ".join(hashtag_to_words(t) for t in re.findall(r"#\w+", r.get("Pin_Description", "")))
         if not r.get("Image_URL"):
