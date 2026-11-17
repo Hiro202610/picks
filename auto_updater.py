@@ -377,9 +377,19 @@ def save_products(new: list[dict], products: list[dict]) -> None:
     PRODUCTS_JSON.write_text(json.dumps(new + products, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def load_batch_rows() -> list[dict]:
+    if not PINTEREST_CSV.exists():
+        return []
+    with PINTEREST_CSV.open(encoding="utf-8-sig", newline="") as f:
+        return [{k: v for k, v in r.items() if k} for r in csv.DictReader(f)]
+
+
 def save_csv(rows: list[dict]) -> None:
+    fields: list[str] = []
+    for r in rows:  # 行ごとに列が違っても（古い形式の行など）すべての列を残す
+        fields += [k for k in r if k not in fields]
     with PINTEREST_CSV.open("w", encoding="utf-8-sig", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()), quoting=csv.QUOTE_ALL)
+        w = csv.DictWriter(f, fieldnames=fields, quoting=csv.QUOTE_ALL, restval="")
         w.writeheader()
         w.writerows(rows)
 
@@ -650,7 +660,8 @@ def main() -> None:
 
     new_products = [p for p, _ in items]
     save_products(new_products, products)
-    save_csv([r for _, r in items])
+    # 管理用CSVは過去の行（予約記録・在庫切れで保留中の行）を残したまま追記する
+    save_csv(load_batch_rows() + [r for _, r in items])
 
     print(f"\n✅ {len(items)}件を products.json の先頭に追加しました（合計 {len(products) + len(items)}件）")
     for p, r in items:
