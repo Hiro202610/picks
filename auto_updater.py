@@ -21,6 +21,7 @@ auto_updater.py — 商品リサーチ → products.json 更新 → GitHub Pages
   python auto_updater.py --schedule --exclude item_20261116_14,item_20261116_15
   #   --start 2026-11-20   開始日を指定 / --per-day 3 --times "9:00,13:00,20:30"  件数と時刻を変更
   #   --clear-schedule     予約を消して「すぐ公開」に戻す
+  #   --only id,id         指定した商品だけでCSVを作る（アップロード済みの予約には触れない）
 
 オプション:
   --no-push   products.json と CSV は更新するが git commit / push はしない（確認用）
@@ -121,9 +122,10 @@ def parse_args() -> argparse.Namespace:
     s.add_argument("--times", default=DEFAULT_POST_TIMES,
                    help=f"投稿時刻（米国東部時間・カンマ区切り。デフォルト {DEFAULT_POST_TIMES}）")
     s.add_argument("--exclude", default="", help="アップロードから外す商品id（カンマ区切り。例: 在庫切れ商品）")
+    s.add_argument("--only", default="", help="この商品idだけでCSVを作る（他の行の予約はそのまま残す）")
     s.add_argument("--clear-schedule", action="store_true", help="予約日時を消して「すぐ公開」に戻す")
     args = p.parse_args()
-    if args.schedule or args.clear_schedule or args.exclude:
+    if args.schedule or args.clear_schedule or args.exclude or args.only:
         args.pinterest_csv = True
     if args.sync_images or args.pinterest_csv:
         return args
@@ -517,16 +519,21 @@ def regenerate_upload_csv(args: argparse.Namespace | None = None) -> None:
             r["Image_URL"] = f"{SITE_URL}images/{pid}.png"
 
     exclude = {x.strip() for x in (args.exclude.split(",") if args and args.exclude else []) if x.strip()}
-    unknown = exclude - {row_id(r) for r in rows}
+    only = {x.strip() for x in (args.only.split(",") if args and args.only else []) if x.strip()}
+    unknown = (exclude | only) - {row_id(r) for r in rows}
     if unknown:
         print(f"⚠️  CSVに見つからないid（無視します）: {', '.join(sorted(unknown))}")
-    targets = [r for r in rows if row_id(r) not in exclude]
-    for r in rows:
-        if row_id(r) in exclude:  # 外した行は予約も消しておく
-            r["Publish_Date"] = r["Publish_ET"] = r["Publish_JST"] = ""
+    if only:
+        # アップロード済みの行は予約記録を残したまま、指定した行だけを対象にする
+        targets = [r for r in rows if row_id(r) in only and row_id(r) not in exclude]
+    else:
+        targets = [r for r in rows if row_id(r) not in exclude]
+        for r in rows:
+            if row_id(r) in exclude:  # 外した行は予約も消しておく
+                r["Publish_Date"] = r["Publish_ET"] = r["Publish_JST"] = ""
 
     if args and args.clear_schedule:
-        for r in rows:
+        for r in targets:
             r["Publish_Date"] = r["Publish_ET"] = r["Publish_JST"] = ""
         print("🗑  予約日時を消しました（アップロードするとすぐ公開されます）。")
     elif args and args.schedule:

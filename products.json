@@ -1,5 +1,44 @@
 [
   {
+    "id": "item_20261117_01",
+    "title": "Classic Cable Knit Christmas Stocking",
+    "category": "Cozy Decor",
+    "summary": "A soft cable knit stocking that gives your mantel that cozy, cabin-at-Christmas feeling. Its timeless knit texture pairs beautifully with neutral garlands, candles and warm white lights.",
+    "points": [
+      "Classic cable knit texture for a cozy, timeless look",
+      "Hanging loop for mantels, staircases or hooks",
+      "Pairs easily with neutral and traditional holiday decor"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B08H26Z7D9?tag=awd2501-20",
+    "badge": "Christmas Pick"
+  },
+  {
+    "id": "item_20261117_02",
+    "title": "Pearhead Babyprints Handprint or Footprint Photo Ornament",
+    "category": "Dreamy Nursery",
+    "summary": "Capture tiny handprints or footprints next to a favorite photo in one sweet keepsake ornament. A meaningful way to celebrate baby's first Christmas, and a thoughtful gift for new parents and grandparents.",
+    "points": [
+      "Two-sided keepsake: photo on one side, hand or footprint on the other",
+      "Clean-touch ink pad included for an easy, mess-free print",
+      "A sentimental gift for baby's first Christmas"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0012V3OOU?tag=awd2501-20",
+    "badge": "Baby's First Christmas"
+  },
+  {
+    "id": "item_20261117_03",
+    "title": "Moroccanoil Mini Must-Haves Deluxe Sampler Set",
+    "category": "Beauty",
+    "summary": "A gift-ready set of mini Moroccanoil favorites, including the signature hair oil with its famous warm scent. Perfect as a stocking stuffer or for anyone who wants to try the brand before going full size.",
+    "points": [
+      "Deluxe minis of Moroccanoil hair and body favorites",
+      "Includes the signature oil treatment and its iconic scent",
+      "Travel-friendly and ready to gift"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0GT1SC4KQ?tag=awd2501-20",
+    "badge": "Gift Set"
+  },
+  {
     "id": "item_20261116_04",
     "title": "Lighted Birch Trees with Remote & Timer, Set of 2",
     "category": "Cozy Decor",
