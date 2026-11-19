@@ -86,6 +86,10 @@
       background: var(--surface); color: var(--accent-dark); border: 1px solid var(--beige-deep);
     }
     .category { font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .sponsored {
+      display: inline-block; margin-left: 10px; padding: 1px 8px; border: 1px solid var(--line); border-radius: 999px;
+      font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+    }
     .visual {
       position: relative; border-radius: calc(var(--radius) - 6px);
       background:
@@ -328,6 +332,11 @@
 
       const detailLink = (p) => "?id=" + encodeURIComponent(p.id);
 
+      // Brand campaign items (Amazon Creator Connections) must be visibly labeled as sponsored.
+      const category = (p) =>
+        '<span class="category">' + esc(p.category) + "</span>" +
+        (p.sponsored ? '<span class="sponsored" title="Paid brand partnership">Sponsored</span>' : "");
+
       function renderFeatured(p) {
         const el = document.getElementById("featured");
         el.innerHTML =
@@ -336,7 +345,7 @@
             '<div class="featured-body">' +
               '<span class="featured-label">Featured Pick</span>' +
               "<h2>" + esc(p.title) + "</h2>" +
-              '<span class="category">' + esc(p.category) + "</span>" +
+              category(p) +
               '<p class="summary">' + esc(p.summary) + "</p>" +
               points(p) +
               button(p) +
@@ -356,7 +365,7 @@
           '<article class="card">' +
             '<a href="' + detailLink(p) + '" aria-label="' + esc(p.title) + '">' + visual(p) + "</a>" +
             '<div class="card-body">' +
-              '<span class="category">' + esc(p.category) + "</span>" +
+              category(p) +
               '<h3><a href="' + detailLink(p) + '">' + esc(p.title) + "</a></h3>" +
               '<p class="summary">' + esc(p.summary) + "</p>" +
               points(p) +

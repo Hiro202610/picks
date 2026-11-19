@@ -75,6 +75,9 @@ ASIN_IN_URL_RE = re.compile(r"/dp/([A-Z0-9]{10})")
 PIN_TITLE_MAX = 100
 PIN_DESC_MAX = 500  # Pinterest の説明文上限
 DISCLOSURE = "(Affiliate link: I may earn a small commission at no extra cost to you.)"
+# ブランドのキャンペーン商品（リサーチファイルで "sponsored": true）に付ける表記。先頭に置いて必ず見えるようにする
+SPONSORED_TITLE_PREFIX = "Ad | "
+SPONSORED_PREFIX = "#ad Sponsored: I earn a commission from this brand. "
 
 IMAGE_PROMPT_RULES = (
     "Vertical 2:3 aspect ratio (1000x1500 px), Pinterest-style lifestyle photograph. "
@@ -339,18 +342,29 @@ def build_items(raw: list[dict], genre: str, count: int, products: list[dict]) -
             "affiliateUrl": f"https://www.amazon.com/dp/{asin}?tag={TRACKING_ID}",
             "badge": r.get("badge") or "Editor's Pick",
         }
+        # Creator Connections のキャンペーン商品は「Ad」を見える位置に入れる（規約: unavoidable disclosure）
+        sponsored = bool(r.get("sponsored"))
+        if sponsored:
+            product["sponsored"] = True
+            if r.get("campaign_end"):
+                product["campaignEnd"] = r["campaign_end"]
 
         tags = [t for t in (normalize_hashtag(h) for h in r.get("hashtags", [])) if t][:5]
         if len(tags) < 5:
             tags = list(dict.fromkeys(tags + default_hashtags(category)))[:5]
         body = (r.get("pin_description") or product["summary"]).strip()
-        tail = f" {DISCLOSURE}\n\n{' '.join(tags)}"
-        if len(body) + len(tail) > PIN_DESC_MAX:
-            body = body[: PIN_DESC_MAX - len(tail) - 1].rsplit(" ", 1)[0] + "…"
+        head = SPONSORED_PREFIX if sponsored else ""
+        brand_note = f" {r['brand_disclosure'].strip()}" if r.get("brand_disclosure") else ""
+        tail = f" {DISCLOSURE}{brand_note}\n\n{' '.join(tags)}"
+        if len(head) + len(body) + len(tail) > PIN_DESC_MAX:
+            body = body[: PIN_DESC_MAX - len(head) - len(tail) - 1].rsplit(" ", 1)[0] + "…"
+        body = head + body
 
         pin_title = (r.get("pin_title") or f"{title} | {category} Idea").strip()
-        if len(pin_title) > PIN_TITLE_MAX:
-            pin_title = pin_title[: PIN_TITLE_MAX - 1].rsplit(" ", 1)[0] + "…"
+        title_head = SPONSORED_TITLE_PREFIX if sponsored else ""
+        if len(title_head) + len(pin_title) > PIN_TITLE_MAX:
+            pin_title = pin_title[: PIN_TITLE_MAX - len(title_head) - 1].rsplit(" ", 1)[0] + "…"
+        pin_title = title_head + pin_title
 
         scene = (r.get("image_scene") or f"A cozy, styled living space featuring the {title}.").strip()
         row = {
