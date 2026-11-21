@@ -1,5 +1,188 @@
 [
   {
+    "id": "item_20261121_01",
+    "title": "grace & stella Retinol Under Eye Patches, Purple, 48 Pairs",
+    "category": "Beauty",
+    "summary": "Gel under-eye patches with retinol, sea moss and ceramides for tired-looking eyes. Smooth them on before bed for a little self-care ritual and wake up looking brighter and more refreshed.",
+    "points": [
+      "Gel under-eye patches with retinol, sea moss and ceramide",
+      "Helps under eyes look less puffy and more refreshed",
+      "48 pairs, a sweet self-care gift or stocking stuffer"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0D5YQV86X?tag=awd2501-20",
+    "badge": "Self-Care Pick",
+    "sponsored": true
+  },
+  {
+    "id": "item_20261121_02",
+    "title": "COSRX 6 Peptide Skin Booster Toner Serum, 5.07 fl oz",
+    "category": "Beauty",
+    "summary": "A lightweight, toner-like serum with six peptides, including copper peptides, that sinks in fast as the first step of your routine. Skin looks smoother and more radiant, and it layers easily under moisturizer.",
+    "points": [
+      "6 peptides, including copper peptides, in a lightweight serum-toner",
+      "Absorbs quickly, an easy first step after cleansing",
+      "Layers well with COSRX Snail 96 Essence and moisturizer"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0CCJ3SRB9?tag=awd2501-20",
+    "badge": "K-Beauty Pick",
+    "sponsored": true,
+    "campaignEnd": "2026-12-19"
+  },
+  {
+    "id": "item_20261121_03",
+    "title": "Bioderma Hydrabio H2O Micellar Water, 3.33 fl oz",
+    "category": "Beauty",
+    "summary": "French micellar water that gently lifts away makeup and daily grime from face and eyes in one easy step, leaving dehydrated, sensitive skin feeling soothed. The handy travel size fits any makeup bag.",
+    "points": [
+      "Gently removes makeup from face and eyes",
+      "Made for dehydrated, sensitive skin; leaves it feeling soothed",
+      "Travel-friendly 3.33 fl oz bottle"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B01AZR9B34?tag=awd2501-20",
+    "badge": "Gentle Favorite",
+    "sponsored": true,
+    "campaignEnd": "2026-12-31"
+  },
+  {
+    "id": "item_20261121_04",
+    "title": "Estée Lauder Beautiful Eau de Parfum, 1.0 fl oz Travel Size",
+    "category": "Beauty",
+    "summary": "A classic floral bouquet of rose, lily, tuberose and orange flower over warm sandalwood and amber. The travel size is a lovely way to gift a timeless signature scent, or to keep in your bag.",
+    "points": [
+      "Floral notes of rose, lily, tuberose and orange flower",
+      "Warm base of sandalwood, vetiver and amber",
+      "1.0 fl oz travel size, easy to gift"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0009OAIBI?tag=awd2501-20",
+    "badge": "Gift Idea",
+    "sponsored": true,
+    "campaignEnd": "2026-12-31"
+  },
+  {
+    "id": "item_20261121_05",
+    "title": "KIKO Milano 3D Hydra Lipgloss Limited Edition, 44 Disruptive Brown",
+    "category": "Beauty",
+    "summary": "A high-shine, hydrating lip gloss with passion fruit oil that leaves lips soft, glossy and fuller-looking in one step. The limited-edition bottle with rose gold details makes it a pretty little gift.",
+    "points": [
+      "High-shine gloss with moisturizing passion fruit oil",
+      "Comfortable texture for soft, fuller-looking lips",
+      "Limited-edition rose gold bottle; dermatologically tested"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0C3VLSVGR?tag=awd2501-20",
+    "badge": "Holiday Glam",
+    "sponsored": true,
+    "campaignEnd": "2026-12-31"
+  },
+  {
+    "id": "item_20261121_06",
+    "title": "Hero Cosmetics Mighty Patch Surface Large Pimple Patches, 10 Count",
+    "category": "Beauty",
+    "summary": "Extra-large hydrocolloid patches for breakouts a small dot can't cover, on cheeks, chin, jawline or body. They stay put and help big blemishes look flatter, with no complicated steps.",
+    "points": [
+      "Large 60 x 25 mm hydrocolloid patches for bigger breakout areas",
+      "Strong adhesive that stays where you put it",
+      "10 patches on easy-peel sheets; vegan-friendly"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B07KJXFJHF?tag=awd2501-20",
+    "badge": "Skincare Staple",
+    "sponsored": true,
+    "campaignEnd": "2026-12-19"
+  },
+  {
+    "id": "item_20261121_07",
+    "title": "Gorilla Grip Plush Chenille Bath Rug, Grey, 36 x 24 in",
+    "category": "Cozy Decor",
+    "summary": "Nearly an inch of soft, thick chenille, so you step out of the shower onto something warm instead of cold tile. It soaks up water, dries quickly, and the rubber backing is built for repeated machine washing.",
+    "points": [
+      "Plush, absorbent chenille that dries quickly",
+      "Textured rubber backing; machine washable and fade resistant",
+      "OEKO-TEX Standard 100 certified materials"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B07TN3RHG9?tag=awd2501-20",
+    "badge": "Award Winner",
+    "sponsored": true,
+    "campaignEnd": "2027-04-01"
+  },
+  {
+    "id": "item_20261121_08",
+    "title": "grace & stella Under Eye Patches Gift Set, 12 Pairs",
+    "category": "Beauty",
+    "summary": "Cooling gel eye patches in gold, blue and pink that help tired, puffy-looking eyes look refreshed and brighter. Vegan and gentle, they turn a few minutes into a relaxing me-time ritual.",
+    "points": [
+      "Gold, blue and pink cooling gel patches with niacinamide",
+      "Vegan, paraben- and sulfate-free formula",
+      "12 pairs, an easy stocking stuffer or party favor"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0CYCFRZKD?tag=awd2501-20",
+    "badge": "Stocking Stuffer",
+    "sponsored": true
+  },
+  {
+    "id": "item_20261121_09",
+    "title": "Iridescent Crystal Snowflake & Icicle Ornaments, 20-Piece Set",
+    "category": "Cozy Decor",
+    "summary": "Shatterproof acrylic snowflakes, icicles and beaded strands that shimmer with an iridescent glow under twinkle lights. A 20-piece set to turn your tree, windows or chandelier into a winter wonderland.",
+    "points": [
+      "20 pieces: snowflakes, icicles, bead garlands, flowers and stars",
+      "Shatterproof, lightweight acrylic with ribbons for easy hanging",
+      "For trees, windows, wreaths, chandeliers and winter parties"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0CJ2YGG1G?tag=awd2501-20",
+    "badge": "Christmas Pick"
+  },
+  {
+    "id": "item_20261121_10",
+    "title": "EACHY Open-Flat Travel Makeup Bag, Yellow, Medium",
+    "category": "Beauty",
+    "summary": "A makeup bag that opens completely flat, so every product is in view on the bathroom counter or hotel vanity. A frosted brush compartment keeps brushes separate, and the exterior wipes clean.",
+    "points": [
+      "Opens flat for easy access while getting ready",
+      "Frosted TPU brush compartment plus inner pockets; 9.3 x 4.1 x 4.3 in",
+      "Water-resistant, wipe-clean PU leather exterior"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0DSBQHVBF?tag=awd2501-20",
+    "badge": "Travel Essential"
+  },
+  {
+    "id": "item_20261121_11",
+    "title": "GODONLIF Candle Warmer Lamp with Timer & Dimmer, Black",
+    "category": "Cozy Decor",
+    "summary": "Enjoy your favorite jar candle's scent without a flame: this lamp melts it gently from the top down. Dim it to set the mood, set the timer, and adjust the height to fit different candle sizes.",
+    "points": [
+      "Flameless: melts jar candles from the top down",
+      "Dimmable with a built-in timer",
+      "Height-adjustable metal base with glass shade"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0CTJGJL2T?tag=awd2501-20",
+    "badge": "Cozy Gift"
+  },
+  {
+    "id": "item_20261121_12",
+    "title": "OLANLY Fluffy Shaggy Rug, Ivory, 3 x 5 ft",
+    "category": "Dreamy Nursery",
+    "summary": "A plush, fluffy ivory rug that adds instant softness to a nursery, bedroom or reading corner. It's machine washable and has a non-slip dotted backing, so it's as practical as it is cozy.",
+    "points": [
+      "Soft, high-density shaggy pile in ivory",
+      "Machine washable (cold) and easy to care for",
+      "Non-slip dotted backing with a thick felt base"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0D9GF6LSM?tag=awd2501-20",
+    "badge": "Soft & Cozy"
+  },
+  {
+    "id": "item_20261121_13",
+    "title": "Bed Canopy with String Lights, White",
+    "category": "Cozy Decor",
+    "summary": "A sheer white canopy with twinkling lights that turns a bed or reading corner into a dreamy, fairy-tale retreat. It hangs from a single ceiling hook and fits beds from twin to queen.",
+    "points": [
+      "Sheer white canopy with string lights included",
+      "Hangs from one sticky ceiling hook; 98 in tall, 25 in hoop",
+      "Fits single, twin, full and queen beds, daybeds and bunk beds"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B07N1DJ1SF?tag=awd2501-20",
+    "badge": "Dreamy Pick"
+  },
+  {
     "id": "item_20261119_01",
     "title": "MOONET Clear Colored Christmas Ball Ornaments, 25-Pack (2.64 in)",
     "category": "Cozy Decor",
