@@ -74,7 +74,7 @@ ASIN_RE = re.compile(r"^[A-Z0-9]{10}$")
 ASIN_IN_URL_RE = re.compile(r"/dp/([A-Z0-9]{10})")
 PIN_TITLE_MAX = 100
 PIN_DESC_MAX = 500  # Pinterest の説明文上限
-DISCLOSURE = "(Affiliate link: I may earn a small commission at no extra cost to you.)"
+DISCLOSURE = "As an Amazon Associate I earn from qualifying purchases."
 # ブランドのキャンペーン商品（リサーチファイルで "sponsored": true）に付ける表記。先頭に置いて必ず見えるようにする
 SPONSORED_TITLE_PREFIX = "Ad | "
 SPONSORED_PREFIX = "#ad Sponsored: I earn a commission from this brand. "
