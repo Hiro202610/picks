@@ -1,5 +1,113 @@
 [
   {
+    "id": "item_20261127_01",
+    "title": "grace & stella Lip Butter, Berry",
+    "category": "Beauty",
+    "summary": "A berry-scented lip butter with jojoba and shea butter that leaves lips soft and shiny without a sticky feel. Wear it as a glossy pink tint by day or as an overnight lip mask.",
+    "points": [
+      "Jojoba seed and shea butter for soft, moisturized lips",
+      "Glossy berry-pink finish, not sticky",
+      "Use as a daytime gloss or overnight lip mask"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0BRYL3XL2?tag=awd2501-20",
+    "badge": "Stocking Stuffer",
+    "sponsored": true,
+    "campaignEnd": "2026-12-13"
+  },
+  {
+    "id": "item_20261127_02",
+    "title": "Clinique Dramatically Different Moisturizing Lotion+, 6.7 fl oz Jumbo",
+    "category": "Beauty",
+    "summary": "Clinique's iconic silky yellow lotion that sinks in fast and keeps skin soft, smooth and hydrated all day. The jumbo pump bottle is fragrance-free and lasts for months.",
+    "points": [
+      "Silky lotion with glycerin and urea for lasting hydration",
+      "Absorbs quickly; 100% fragrance-free and allergy tested",
+      "Jumbo 6.7 oz pump bottle"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B00JGLEQAO?tag=awd2501-20",
+    "badge": "Holiday Deal",
+    "sponsored": true,
+    "campaignEnd": "2026-12-31"
+  },
+  {
+    "id": "item_20261127_03",
+    "title": "Coconut Spa Gift Basket, 7 Pieces",
+    "category": "Beauty",
+    "summary": "A coconut-scented spa set with shower gel, bubble bath, body cream, bath oil, bath salt and a puff, arranged in a reusable woven basket. It arrives gift-ready with a note card.",
+    "points": [
+      "7 pieces with shea butter and essential oils",
+      "Warm, sweet coconut scent",
+      "Reusable woven basket and gift note card included"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0C4KWGTH7?tag=awd2501-20",
+    "badge": "Gift Idea"
+  },
+  {
+    "id": "item_20261127_04",
+    "title": "TruSkin Vitamin C Serum with Hyaluronic Acid, 2 fl oz",
+    "category": "Beauty",
+    "summary": "A lightweight vitamin C serum that helps dull, tired-looking skin look brighter and more even. It uses a gentle form of vitamin C plus hyaluronic acid, aloe and jojoba for everyday use.",
+    "points": [
+      "Gentle, stable vitamin C (SAP) for a brighter look",
+      "Hyaluronic acid, vitamin E, aloe and jojoba",
+      "Lightweight; dries down fast under moisturizer"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B01EKUBU5Y?tag=awd2501-20",
+    "badge": "Glow Pick"
+  },
+  {
+    "id": "item_20261127_05",
+    "title": "BIODANCE Bio-Collagen Real Deep Mask, 4 Count",
+    "category": "Beauty",
+    "summary": "The viral K-beauty hydrogel mask that turns clear as it melts in overnight. Wake up to skin that looks plump, hydrated and glowy, the glass-skin look.",
+    "points": [
+      "Hydrogel mask with collagen and hyaluronic acid",
+      "Turns transparent as the essence absorbs",
+      "4 individually packed masks for overnight use"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0B2RM68G2?tag=awd2501-20",
+    "badge": "K-Beauty Pick"
+  },
+  {
+    "id": "item_20261127_06",
+    "title": "Amazon Basics Kids Pink Heart Decorative Pillow",
+    "category": "Dreamy Nursery",
+    "summary": "A soft little pink heart pillow that adds a sweet touch to a girl's room or reading nook. It's OEKO-TEX certified and pairs easily with other pink decor.",
+    "points": [
+      "Ultra-soft pink heart, about 10.5 x 4 inches",
+      "OEKO-TEX MADE IN GREEN certified",
+      "Cute accent for a kids' room or reading corner"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B08BDB8FL5?tag=awd2501-20",
+    "badge": "Sweet Decor"
+  },
+  {
+    "id": "item_20261127_07",
+    "title": "Bedsure Cloud Bubble Throw Blanket, Light Pink, 50 x 60 in",
+    "category": "Cozy Decor",
+    "summary": "A light pink throw with Bedsure's soft CloudBubble texture that looks cute draped on a sofa or chair. It's lightweight but cozy, perfect for movie nights and pink holiday decor.",
+    "points": [
+      "Soft bubble texture, 50 x 60 inches",
+      "Lightweight and cozy for every season",
+      "A pretty accent for pink Christmas decor"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0F6SZF9XM?tag=awd2501-20",
+    "badge": "Cozy Gift"
+  },
+  {
+    "id": "item_20261127_08",
+    "title": "NEST New York Holiday Classic Candle, 8.1 oz",
+    "category": "Cozy Decor",
+    "summary": "NEST's beloved Holiday candle in a gold-etched glass, scented with pomegranate, mandarin, pine, clove and cinnamon. It burns cleanly for about 50 to 60 hours and makes an elegant gift.",
+    "points": [
+      "Notes of pomegranate, mandarin, pine, clove and cinnamon",
+      "Gold-etched glass, about 50 to 60 hour burn",
+      "Vegan, cruelty-free and made in the USA"
+    ],
+    "affiliateUrl": "https://www.amazon.com/dp/B0043R48Z4?tag=awd2501-20",
+    "badge": "Luxe Gift"
+  },
+  {
     "id": "item_20261125_01",
     "title": "National Tree Company 24 in. Pre-Lit Crestwood Spruce Wreath, Battery-Operated",
     "category": "Cozy Decor",
